@@ -1,10 +1,14 @@
+/**
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include <stdio.h>
-#include "hardware/adc.h"
+#include <string.h>
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
-#include "ili9341.h"
 #include "hardware/spi.h"
-#include "gfx.h"
 
 /* Example code to talk to a bme280 humidity/temperature/pressure sensor.
 
@@ -34,7 +38,6 @@
 */
 
 #define READ_BIT 0x80
-#define spi_default spi0
 
 int32_t t_fine;
 
@@ -133,9 +136,9 @@ static void read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
     // so we don't need to keep sending the register we want, just the first.
     reg |= READ_BIT;
     cs_select();
-    spi_write_blocking(spi0, &reg, 1);
+    spi_write_blocking(spi_default, &reg, 1);
     sleep_ms(10);
-    spi_read_blocking(spi0, 0, buf, len);
+    spi_read_blocking(spi_default, 0, buf, len);
     cs_deselect();
     sleep_ms(10);
 }
@@ -183,15 +186,10 @@ static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *tempe
 
 int main() {
     stdio_init_all();
-#if !defined(spi_default) || !defined(PICO_DEFAULT_SPI_SCK_PIN) || !defined(PICO_DEFAULT_SPI_TX_PIN) || !defined(PICO_DEFAULT_SPI_RX_PIN) || !defined(PICO_DEFAULT_SPI_CSN_PIN)
-#warning spi/bme280_spi example requires a board with SPI pins
-    puts("Default SPI pins were not defined");
-#else
-
     printf("Hello, bme280! Reading raw data from registers via SPI...\n");
 
     // This example will use SPI0 at 0.5MHz.
-    spi_init(spi0, 500 * 1000);
+    spi_init(spi_default, 500 * 1000);
     gpio_set_function(PICO_DEFAULT_SPI_RX_PIN, GPIO_FUNC_SPI);
     gpio_set_function(PICO_DEFAULT_SPI_SCK_PIN, GPIO_FUNC_SPI);
     gpio_set_function(PICO_DEFAULT_SPI_TX_PIN, GPIO_FUNC_SPI);
@@ -217,10 +215,6 @@ int main() {
 
     int32_t humidity, pressure, temperature;
 
-    LCD_initDisplay();
-    LCD_setRotation(1);
-    GFX_createFramebuf();
-
     while (1) {
         bme280_read_raw(&humidity, &pressure, &temperature);
 
@@ -233,7 +227,7 @@ int main() {
         printf("Humidity = %.2f%%\n", humidity / 1024.0);
         printf("Pressure = %dPa\n", pressure);
         printf("Temp. = %.2fC\n", temperature / 100.0);
+
         sleep_ms(1000);
     }
-#endif
 }

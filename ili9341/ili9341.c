@@ -12,14 +12,14 @@ int16_t _ystart = 0; ///< Internal framebuffer Y offset
 
 uint8_t rotation;
 
-spi_inst_t *ili9341_spi = spi_default;
+spi_inst_t *ili9341_spi = spi1;
 
-uint16_t ili9341_pinCS = PICO_DEFAULT_SPI_CSN_PIN;
-uint16_t ili9341_pinDC = 20;
-int16_t ili9341_pinRST = 16;
+uint16_t ili9341_pinCS = 9;
+uint16_t ili9341_pinDC = 15;
+int16_t ili9341_pinRST = 14;
 
-uint16_t ili9341_pinSCK = PICO_DEFAULT_SPI_SCK_PIN;
-uint16_t ili9341_pinTX = PICO_DEFAULT_SPI_TX_PIN;
+uint16_t ili9341_pinSCK = 10;
+uint16_t ili9341_pinTX = 11;
 
 const uint8_t initcmd[] = {
 	24, //24 commands
