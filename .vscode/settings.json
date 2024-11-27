@@ -40,6 +40,9 @@
          "buildTarget": {
              "visibility": "hidden"
          }
+},
+"files.associations": {
+    "att_server.h": "c"
 }
 
      
