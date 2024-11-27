@@ -9,6 +9,8 @@
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
 #include "hardware/spi.h"
+#include "gfx.h"
+#include "ili9341.h"
 
 /* Example code to talk to a bme280 humidity/temperature/pressure sensor.
 
@@ -184,6 +186,14 @@ static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *tempe
 }
 #endif
 
+int display() {
+    LCD_initDisplay();
+    LCD_setRotation(1);
+    GFX_createFramebuf();
+
+    return 0;
+}
+
 int main() {
     stdio_init_all();
     printf("Hello, bme280! Reading raw data from registers via SPI...\n");
@@ -214,6 +224,7 @@ int main() {
     write_register(0xF4, 0x27);// Set rest of oversampling modes and run mode to normal
 
     int32_t humidity, pressure, temperature;
+    display();
 
     while (1) {
         bme280_read_raw(&humidity, &pressure, &temperature);
@@ -228,6 +239,14 @@ int main() {
         printf("Pressure = %dPa\n", pressure);
         printf("Temp. = %.2fC\n", temperature / 100.0);
 
+        GFX_clearScreen();
+        GFX_setCursor(0, 0);
+        GFX_printf("Humidity = %.2f%%\n", humidity / 1024.0);
+        GFX_setCursor(0, 50);
+        GFX_printf("Pressure = %dPa\n", pressure);
+        GFX_setCursor(0, 100);
+        GFX_printf("Temp. = %.2fC\n", temperature / 100.0);
+        GFX_flush();
         sleep_ms(1000);
     }
 }
